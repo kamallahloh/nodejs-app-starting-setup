@@ -7,13 +7,24 @@ FROM node
 # create a directory in the container
 WORKDIR /app
 
+# images are layer based so each command in the Dockerfile will create a new layer
+# so we need to be careful with the order of the commands in the Dockerfile 
+# any changes in the source code will invalidate the cache and the image will be rebuilt
+# so first we only copy the package.json file to the /app directory in the container
+
+COPY package.json /app
+
+# run the application
+RUN npm install
+
 # COPY the current directory to the /app directory in the container
 # this will copy all the files to the /app directory in the container
 # COPY . ./
 COPY . /app
-
-# run the application
-RUN npm install
+# this copy is part of the source code that ships with the image
+# to reflect the changes in the source code, we need to rebuild the image
+# Images are readonly XXX
+# so we need to run docker build . to rebuild to new image with different source code
 
 # since the docker image is isolated from the host machine, we need to expose the port to the host machine
 EXPOSE 80
